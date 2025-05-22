@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>無標題文件</title>
+<script>
+var canvas ;  //畫布物件
+var ctx; //畫布內容
+var cx,cy; //畫布中心點，太陽的位置
+var img; //圖片變數
+var clock1 = 0; //宣告一個時鐘clock1
+var xday=0;  //地球日
+var au=200;   //天文單位，距離太陽距離
+var ex=200,ey=400;  //地球初始座標
+var mx=100,my=400;  //火星初始座標
+const marsDate = new Date('2022-12-8');  //上次火星衝日
+var ship;
+var paths = [];
+function clock1_tick() {
+	
+	cls();
+//第一題，為簡化問題，我們假設所有繞日公轉軌道是圓形，地球公轉一圈365日，火星公轉一圈687日
+	draw("sun.png",0,0);   //以太陽為圓心
+	ex=1*au*Math.cos(-xday/365*2*Math.PI);
+	ey=1*au*Math.sin(-xday/365*2*Math.PI);
+	circle(0,0,au,'blue');
+	draw("earth.png",ex,ey);
+	mx=1.5*au*Math.cos(-xday/687*2*Math.PI);
+	my=1.5*au*Math.sin(-xday/687*2*Math.PI);
+	circle(0,0,1.5*au,'red');
+	draw("mars.png",mx,my);
+	xday++;
+	eday.innerText=xday;
+//第二題，計算地球與火星距離，距離最近為火星衝日，觀測火星衝日間格是否約為26個月(780日) 
+	var m2e=Math.sqrt((ex-mx)*(ex-mx)+(ey-my)*(ey-my))
+	e2m.innerText=m2e;
+	if (m2e<=0.5*au+0.01 && xday>1) {
+		//clearInterval(clock1);
+		const resultDate = new Date(marsDate); // 複製原始日期
+		resultDate.setDate(marsDate.getDate() + xday); // 增加天數
+		listadd("火星衝日:"+xday+"th day, "+resultDate.toDateString(),"red");
+		}
+//第三題，計算地球與火星夾角
+	innerp=ex*mx+ey*my
+	a=Math.sqrt(ex*ex+ey*ey);
+	b=Math.sqrt(mx*mx+my*my);
+	c=innerp/(a*b);
+	d=Math.acos(c)*180/Math.PI;
+	angle.innerText=d;
+//第四題，夾角45到43度內(火星在前)新增發射窗口到demo list
+	if (d<45 && d>43 && ex*my-mx*ey<0){
+		const resultDate = new Date(marsDate); // 複製原始日期
+		resultDate.setDate(marsDate.getDate() + xday); // 增加天數
+		listadd("發射窗口:"+xday+"th day, "+resultDate.toDateString(),"yellow");
+		ship=1;      //出發，第一天
+		paths.length=0;  //軌跡清零
+	}
+//	第六題、畫出霍曼轉移軌道，登陸火星需259天。
+	if(ship>0) {
+		p=ship / 259;   //計算過度
+		shipx=(1-p)*ex+p*mx;  //使用插值計算太空船位置
+		shipy=(1-p)*ey+p*my;
+		draw("ship.png",shipx,shipy);   //畫太空船
+		//circle(shipx,shipy,"blue",10);  //軌跡小圓圈
+		paths.push({x:shipx,y:shipy});  //軌跡紀錄到paths陣列中
+		drawCircles(paths);             //將paths陣列中的各點輸出
+		ship++;                         //天數加一	
+		if(ship==259) {        //登陸火星
+			const resultDate = new Date(marsDate); // 複製原始日期
+			resultDate.setDate(marsDate.getDate() + xday); // 增加天數
+			listadd("登陸火星:"+xday+"th day, "+resultDate.toDateString(),"yellow");
+			ship=0;
+		}
+		
+	}
+} //end clock1
+//第五題，完成數學式推算火星衝間隔，假設火星公轉687天，地球公轉365天
+function ex5(){
+	alert( 1    /( 1    / 365- 1    / 687 ));
+}
+
+function cls() { //clear screen清除螢幕
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+function circle(X,Y,Radius,Color,Width,Fill) {  //畫圓
+	ctx.beginPath();
+	ctx.arc(cx+X, cy+Y, Radius, 0, 2 * Math.PI, false);
+	ctx.lineWidth = Width;
+	ctx.strokeStyle = Color;
+	if (Fill) {
+		ctx.fillStyle = Fill;
+		ctx.fill();
+	}
+	  ctx.stroke();	  
+}
+function msgbox(text,x,y) {
+	ctx.fillStyle = "red";
+	ctx.font = "30px Arial";
+	ctx.fillText(text, x, y);
+}
+// Function to draw a circle at each point
+function drawCircles() {
+	// Loop through the points array
+
+		// Draw a yellow circle with radius 10 at each (x, y)
+	for (i=0;i<paths.length;i++) {
+	circle(paths[i].x, paths[i].y,3,"yellow");
+//	console.log(point.x, point.y);
+	}
+
+}
+
+
+window.onload = function(){	 //啟動時抓取畫布中心點，啟動時鐘
+  canvas = document.getElementById("myCanvas");
+  ctx = canvas.getContext("2d");
+  cx=canvas.width/2 ;
+  cy=canvas.height/2;
+  xday=0;
+  s2e.innerText=au;
+  s2m.innerText=1.5*au;
+  lastmd.innerText="2022-12-8"
+  clock1 = setInterval(function(){clock1_tick()},1); 
+  }  
+function draw(file,x,y) {
+	img= new Image;
+	img.src = file;
+	ctx.drawImage(img,cx+ x-img.width/2 , cy+y-img.height/2);
+
+}
+function listadd(item,c) {
+	var entry = document.createElement('li');
+	entry.appendChild(document.createTextNode(item));
+	entry.style.color=c;
+	demo.appendChild(entry);	
+	//alert(item);
+	clearInterval(clock1);
+}
+function cont() {
+  clock1 = setInterval(function(){clock1_tick()},1); 
+}
+
+</script>
+<style type="text/css">
+body,td,th {
+	color: #FFF;
+}
+body {
+	background-color: #000;
+}
+</style>
+</head>
+<body>
+<table>
+<tr>
+<td align="right" valign="top">
+<div id="form1" style="height:550px; border-bottom:thick; border-bottom-color:#6F0">
+<canvas id="myCanvas" width="800" height="800" style="border:1px solid #d3d3d3" >
+Your browser does not support the HTML5 canvas tag.
+</canvas>   
+</div>
+
+</td>
+<td align="left" valign="top">
+日地距離：<label id="s2e">0</label><br />
+日火距離：<label id="s2m">0</label><br />
+地球日：<label id="eday">0</label><br />
+地火距離：<label id="e2m">0</label><br />
+地火夾角：<label id="angle">0</label><br />
+上次火星衝日期：<label id="lastmd">0</label><br />
+
+
+
+<P/>
+<input type="button" onclick="cont()" value="繼續" />
+<input type="button" onclick="ex5()" value="第五題">
+<P/>
+日期
+<ol id="demo"></ol>
+</td>
+</tr>
+
+
+</body>
+</html>
+

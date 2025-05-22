@@ -1,0 +1,11 @@
+*function*clock1_tick*(**)**{*
+*cls*(**)***
+*draw*(*"sun.png"*,*0*,*0*)******
+*ex*=*1*au*Math.cos*(**-*xday*/*365*2*Math.PI*)***
+*ey*=*1*au*Math.sin*(**-*xday*/*365*2*Math.PI*)***
+*circle*(*0*,*0*,*au*,*
+*draw*(*"earth.png"*,*ex*,*ey*)***
+*mx*=*1.5*au*Math.cos*(**-*xday*/*687*2*Math.PI*)***
+*my*=*1.5*au*Math.sin*(**-*xday*/*687*2*Math.PI*)***
+*circle*(*0*,*0*,*1.5*au*,*
+*draw*(*"mars.png"*,*mx*,*my*)***
