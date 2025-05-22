@@ -137,7 +137,10 @@ function listadd(item,c) {
 	clearInterval(clock1);
 }
 function cont() {
-  clock1 = setInterval(function(){clock1_tick()},1); 
+if (clock1) 
+    clearInterval(clock1);  // If running, clear it
+// Set a new interval (or reset if previously cleared)
+clock1 = setInterval(function(){clock1_tick()},1); 
 }
 
 </script>
